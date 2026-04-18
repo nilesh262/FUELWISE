@@ -1,0 +1,1932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FuelWise — Route-Based Fuel Cost Optimization for India</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --blue-900: #0d2137;
+  --blue-800: #0f3460;
+  --blue-700: #1457a0;
+  --blue-600: #1565C0;
+  --blue-500: #1976D2;
+  --blue-400: #42A5F5;
+  --blue-100: #e3f0fc;
+  --blue-50: #f0f7ff;
+  --green-600: #558B2F;
+  --green-500: #689F38;
+  --green-400: #7CB342;
+  --green-300: #9CCC65;
+  --green-100: #e8f5e9;
+  --green-50: #f1f8e9;
+  --slate-900: #0f172a;
+  --slate-800: #1e293b;
+  --slate-700: #334155;
+  --slate-600: #475569;
+  --slate-500: #64748b;
+  --slate-400: #94a3b8;
+  --slate-300: #cbd5e1;
+  --slate-200: #e2e8f0;
+  --slate-100: #f1f5f9;
+  --slate-50: #f8fafc;
+  --white: #ffffff;
+  --orange-500: #f97316;
+  --red-500: #ef4444;
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body: 'DM Sans', -apple-system, sans-serif;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.04);
+  --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.08), 0 8px 10px -6px rgba(0,0,0,0.04);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-lg: 20px;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  color: var(--slate-800);
+  background: var(--white);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ========== NAV ========== */
+nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--slate-200);
+  transition: box-shadow 0.3s;
+}
+nav.scrolled { box-shadow: var(--shadow-md); }
+.nav-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 32px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+.nav-logo-icon {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, var(--blue-600), var(--blue-700));
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 16px;
+}
+.nav-logo-text {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--blue-800);
+  letter-spacing: -0.5px;
+}
+.nav-logo-text span { color: var(--green-500); }
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  list-style: none;
+}
+.nav-links a {
+  text-decoration: none;
+  color: var(--slate-600);
+  font-size: 14px;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--blue-600); }
+.nav-cta {
+  background: var(--blue-600) !important;
+  color: white !important;
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-weight: 600 !important;
+  transition: background 0.2s, transform 0.15s !important;
+}
+.nav-cta:hover {
+  background: var(--blue-700) !important;
+  transform: translateY(-1px);
+}
+
+/* ========== HERO ========== */
+.hero {
+  padding: 140px 32px 80px;
+  background: linear-gradient(175deg, var(--blue-50) 0%, var(--white) 50%, var(--green-50) 100%);
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -200px;
+  right: -200px;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(21,101,192,0.04) 0%, transparent 70%);
+  border-radius: 50%;
+}
+.hero-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--green-100);
+  color: var(--green-600);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 100px;
+  margin-bottom: 24px;
+  border: 1px solid rgba(85,139,47,0.15);
+}
+.hero-badge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background: var(--green-500);
+  border-radius: 50%;
+}
+.hero h1 {
+  font-family: var(--font-display);
+  font-size: 52px;
+  line-height: 1.1;
+  font-weight: 700;
+  color: var(--slate-900);
+  letter-spacing: -1.5px;
+  margin-bottom: 20px;
+}
+.hero h1 em {
+  font-style: italic;
+  color: var(--blue-600);
+}
+.hero-sub {
+  font-size: 18px;
+  color: var(--slate-600);
+  line-height: 1.7;
+  margin-bottom: 32px;
+  max-width: 520px;
+}
+.hero-actions {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  margin-bottom: 40px;
+}
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 28px;
+  background: var(--blue-600);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(21,101,192,0.25);
+}
+.btn-primary:hover {
+  background: var(--blue-700);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(21,101,192,0.3);
+}
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 28px;
+  background: var(--white);
+  color: var(--slate-700);
+  border: 1.5px solid var(--slate-300);
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+.btn-secondary:hover {
+  border-color: var(--blue-400);
+  color: var(--blue-600);
+  background: var(--blue-50);
+}
+.hero-proof {
+  display: flex;
+  gap: 32px;
+  align-items: center;
+}
+.hero-stat {
+  display: flex;
+  flex-direction: column;
+}
+.hero-stat-value {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--blue-700);
+  line-height: 1.2;
+}
+.hero-stat-label {
+  font-size: 12px;
+  color: var(--slate-500);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.hero-stat-divider {
+  width: 1px;
+  height: 40px;
+  background: var(--slate-200);
+}
+
+/* Hero Visual */
+.hero-visual {
+  position: relative;
+}
+.product-card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  border: 1px solid var(--slate-200);
+  overflow: hidden;
+}
+.product-card-header {
+  background: linear-gradient(135deg, var(--blue-600), var(--blue-800));
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.product-card-header-title {
+  color: white;
+  font-weight: 600;
+  font-size: 15px;
+}
+.product-card-header-dots {
+  display: flex;
+  gap: 6px;
+}
+.product-card-header-dots span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.3);
+}
+.product-card-body {
+  padding: 24px;
+}
+.route-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.route-input {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border: 1.5px solid var(--slate-200);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  color: var(--slate-700);
+  background: var(--slate-50);
+}
+.route-input .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.dot-green { background: var(--green-500); }
+.dot-red { background: var(--red-500); }
+.route-connector {
+  width: 2px;
+  height: 16px;
+  background: var(--slate-300);
+  margin-left: 20px;
+  border-radius: 2px;
+}
+.route-meta {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.route-meta-tag {
+  padding: 6px 12px;
+  background: var(--slate-100);
+  border-radius: 6px;
+  font-size: 12px;
+  color: var(--slate-600);
+  font-weight: 500;
+}
+.route-meta-tag.active {
+  background: var(--blue-100);
+  color: var(--blue-700);
+}
+.fuel-stop {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px;
+  border: 1.5px solid var(--slate-200);
+  border-radius: var(--radius);
+  margin-bottom: 10px;
+  background: var(--white);
+  transition: border-color 0.2s;
+}
+.fuel-stop.best {
+  border-color: var(--green-400);
+  background: var(--green-50);
+}
+.fuel-stop-logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 11px;
+  flex-shrink: 0;
+  color: white;
+}
+.fuel-stop-info { flex: 1; }
+.fuel-stop-name {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--slate-800);
+}
+.fuel-stop-detail {
+  font-size: 12px;
+  color: var(--slate-500);
+  margin-top: 2px;
+}
+.fuel-stop-price {
+  text-align: right;
+  flex-shrink: 0;
+}
+.fuel-stop-price-value {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--slate-900);
+}
+.fuel-stop-price-unit {
+  font-size: 11px;
+  color: var(--slate-500);
+}
+.fuel-stop-savings {
+  display: inline-block;
+  background: var(--green-100);
+  color: var(--green-600);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-top: 4px;
+}
+.fuel-stop-badge {
+  display: inline-block;
+  background: var(--green-400);
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-left: 6px;
+}
+.float-savings {
+  position: absolute;
+  top: -20px;
+  right: -20px;
+  background: var(--green-500);
+  color: white;
+  padding: 12px 18px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  z-index: 2;
+  animation: float 3s ease-in-out infinite;
+}
+.float-savings-amount {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+.float-savings-label {
+  font-size: 11px;
+  opacity: 0.9;
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+/* ========== SECTIONS ========== */
+.section {
+  padding: 96px 32px;
+}
+.section-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.section-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--blue-600);
+  margin-bottom: 16px;
+}
+.section-label::before {
+  content: '';
+  width: 20px;
+  height: 2px;
+  background: var(--blue-600);
+  border-radius: 2px;
+}
+.section-title {
+  font-family: var(--font-display);
+  font-size: 40px;
+  font-weight: 700;
+  color: var(--slate-900);
+  letter-spacing: -1px;
+  line-height: 1.15;
+  margin-bottom: 16px;
+}
+.section-subtitle {
+  font-size: 17px;
+  color: var(--slate-500);
+  line-height: 1.7;
+  max-width: 640px;
+}
+
+/* ========== PROBLEM ========== */
+.problem-section { background: var(--slate-50); }
+.problem-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+  align-items: center;
+  margin-top: 48px;
+}
+.price-map-card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--slate-200);
+  overflow: hidden;
+}
+.price-map-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--slate-200);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.price-map-header h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--slate-800);
+}
+.price-map-date {
+  font-size: 12px;
+  color: var(--slate-400);
+}
+.price-map-body { padding: 20px; }
+.state-price-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--slate-100);
+}
+.state-price-row:last-child { border-bottom: none; }
+.state-name {
+  font-size: 14px;
+  color: var(--slate-700);
+  font-weight: 500;
+}
+.state-vat {
+  font-size: 12px;
+  color: var(--slate-400);
+}
+.state-price {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 16px;
+}
+.state-price.low { color: var(--green-600); }
+.state-price.mid { color: var(--orange-500); }
+.state-price.high { color: var(--red-500); }
+.price-spread-bar {
+  margin-top: 20px;
+  padding: 16px;
+  background: var(--blue-50);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.price-spread-label {
+  font-size: 13px;
+  color: var(--slate-600);
+  font-weight: 500;
+}
+.price-spread-value {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--blue-700);
+}
+.problem-points {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.problem-point {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+.problem-point-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 20px;
+}
+.problem-point-icon.red { background: #fef2f2; }
+.problem-point-icon.orange { background: #fff7ed; }
+.problem-point-icon.blue { background: var(--blue-100); }
+.problem-point h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--slate-800);
+  margin-bottom: 4px;
+}
+.problem-point p {
+  font-size: 14px;
+  color: var(--slate-500);
+  line-height: 1.6;
+}
+
+/* ========== HOW IT WORKS ========== */
+.how-section { background: var(--white); text-align: center; }
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px;
+  margin-top: 56px;
+  position: relative;
+}
+.steps-grid::before {
+  content: '';
+  position: absolute;
+  top: 44px;
+  left: 20%;
+  right: 20%;
+  height: 2px;
+  background: linear-gradient(90deg, #bbdefb, var(--green-300));
+  z-index: 0;
+}
+.step-card {
+  position: relative;
+  z-index: 1;
+}
+.step-number {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+  font-size: 28px;
+  background: var(--white);
+  box-shadow: var(--shadow-lg);
+  border: 3px solid var(--slate-200);
+  position: relative;
+  transition: all 0.3s;
+}
+.step-card:hover .step-number {
+  border-color: var(--blue-400);
+  transform: scale(1.05);
+}
+.step-num-text {
+  position: absolute;
+  top: -8px;
+  right: -4px;
+  background: var(--blue-600);
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: var(--font-body);
+}
+.step-card h3 {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--slate-800);
+  margin-bottom: 8px;
+}
+.step-card p {
+  font-size: 14px;
+  color: var(--slate-500);
+  line-height: 1.6;
+  max-width: 280px;
+  margin: 0 auto;
+}
+
+/* ========== FEATURES ========== */
+.features-section { background: var(--slate-50); }
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 56px;
+}
+.feature-card {
+  background: var(--white);
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius);
+  padding: 32px 28px;
+  transition: all 0.3s;
+}
+.feature-card:hover {
+  border-color: var(--blue-400);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-3px);
+}
+.feature-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  margin-bottom: 20px;
+}
+.feature-icon.blue { background: var(--blue-100); }
+.feature-icon.green { background: var(--green-100); }
+.feature-icon.orange { background: #fff7ed; }
+.feature-card h3 {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--slate-800);
+  margin-bottom: 8px;
+}
+.feature-card p {
+  font-size: 14px;
+  color: var(--slate-500);
+  line-height: 1.65;
+}
+
+/* ========== AUDIENCE ========== */
+.audience-section { background: var(--white); }
+.audience-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  margin-top: 56px;
+}
+.audience-card {
+  border: 1.5px solid var(--slate-200);
+  border-radius: var(--radius-lg);
+  padding: 40px 36px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s;
+}
+.audience-card:hover {
+  border-color: var(--blue-400);
+  box-shadow: var(--shadow-lg);
+}
+.audience-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+}
+.audience-card.fleet::before { background: var(--blue-600); }
+.audience-card.commuter::before { background: var(--green-500); }
+.audience-card-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 12px;
+}
+.audience-card.fleet .audience-card-label { color: var(--blue-600); }
+.audience-card.commuter .audience-card-label { color: var(--green-600); }
+.audience-card h3 {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--slate-900);
+  margin-bottom: 12px;
+}
+.audience-card > p {
+  font-size: 14px;
+  color: var(--slate-500);
+  line-height: 1.65;
+  margin-bottom: 20px;
+}
+.audience-features {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.audience-feature {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--slate-700);
+  font-weight: 500;
+}
+.audience-feature .check {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  flex-shrink: 0;
+  color: white;
+}
+.fleet .check { background: var(--blue-600); }
+.commuter .check { background: var(--green-500); }
+
+/* ========== COMPETITIVE EDGE ========== */
+.edge-section {
+  background: linear-gradient(175deg, var(--blue-800), var(--blue-900));
+  color: white;
+}
+.edge-section .section-label { color: var(--blue-400); }
+.edge-section .section-label::before { background: var(--blue-400); }
+.edge-section .section-title { color: white; }
+.edge-section .section-subtitle { color: rgba(255,255,255,0.65); }
+.comparison-table {
+  margin-top: 48px;
+  background: rgba(255,255,255,0.06);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255,255,255,0.1);
+  overflow: hidden;
+}
+.comp-row {
+  display: grid;
+  grid-template-columns: 2fr repeat(4, 1fr);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.comp-row:last-child { border-bottom: none; }
+.comp-row.header { background: rgba(255,255,255,0.04); }
+.comp-cell {
+  padding: 16px 20px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.comp-cell:first-child {
+  justify-content: flex-start;
+  font-weight: 500;
+  color: rgba(255,255,255,0.8);
+}
+.comp-row.header .comp-cell {
+  font-weight: 600;
+  font-size: 13px;
+  color: rgba(255,255,255,0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.comp-row.header .comp-cell.fw { color: var(--green-400); }
+.comp-yes {
+  width: 24px; height: 24px;
+  background: var(--green-500);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-size: 13px; font-weight: 700;
+}
+.comp-no {
+  width: 24px; height: 24px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: rgba(255,255,255,0.3); font-size: 13px;
+}
+
+/* ========== MARKET ========== */
+.market-section { background: var(--slate-50); }
+.market-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-top: 48px;
+}
+.market-stat-card {
+  background: var(--white);
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius);
+  padding: 28px 24px;
+  text-align: center;
+}
+.market-stat-value {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--blue-700);
+  line-height: 1.1;
+  margin-bottom: 6px;
+}
+.market-stat-label {
+  font-size: 13px;
+  color: var(--slate-500);
+  line-height: 1.5;
+}
+
+/* ========== DEMO ========== */
+.demo-section { background: var(--white); text-align: center; }
+.demo-container {
+  margin-top: 48px;
+  overflow: hidden;
+}
+.demo-app {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  text-align: left;
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-xl);
+  border: 1px solid var(--slate-200);
+  min-height: 480px;
+}
+.demo-sidebar {
+  background: var(--slate-50);
+  border-right: 1px solid var(--slate-200);
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.demo-sidebar h4 {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--slate-800);
+}
+.demo-field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--slate-500);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+.demo-input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid var(--slate-200);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: var(--font-body);
+  color: var(--slate-700);
+  background: var(--white);
+  outline: none;
+  transition: border-color 0.2s;
+}
+.demo-input:focus { border-color: var(--blue-400); }
+.demo-select {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid var(--slate-200);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: var(--font-body);
+  color: var(--slate-700);
+  background: var(--white);
+  outline: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}
+.demo-btn {
+  width: 100%;
+  padding: 12px;
+  background: var(--green-500);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background 0.2s;
+  margin-top: auto;
+}
+.demo-btn:hover { background: var(--green-600); }
+.demo-map {
+  position: relative;
+  background: linear-gradient(160deg, #dce9f3 0%, #c8dae8 40%, #d4e2d4 70%, #e0e8e0 100%);
+  overflow: hidden;
+}
+.map-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.4) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.4) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+.map-route-line {
+  position: absolute;
+  top: 50%;
+  left: 10%;
+  width: 80%;
+  height: 3px;
+  background: var(--blue-500);
+  border-radius: 2px;
+  opacity: 0.7;
+}
+.map-route-line::before {
+  content: '';
+  position: absolute;
+  top: -40px;
+  left: 30%;
+  width: 40%;
+  height: 80px;
+  border: 3px solid var(--blue-500);
+  border-bottom: none;
+  border-radius: 40px 40px 0 0;
+  opacity: 0.4;
+}
+.map-pin {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  z-index: 2;
+}
+.map-pin-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 3px solid white;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+.map-pin-label {
+  padding: 3px 8px;
+  background: white;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+.map-fuel-marker {
+  position: absolute;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.map-fuel-icon {
+  width: 32px;
+  height: 32px;
+  background: var(--green-500);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: white;
+  border: 2px solid white;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+.map-fuel-price {
+  padding: 2px 8px;
+  background: white;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--green-600);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  margin-top: 4px;
+  white-space: nowrap;
+}
+.state-border-line {
+  position: absolute;
+  top: 8%;
+  bottom: 8%;
+  width: 2px;
+  background: repeating-linear-gradient(to bottom, var(--slate-400) 0, var(--slate-400) 6px, transparent 6px, transparent 12px);
+  opacity: 0.5;
+}
+.state-label-tag {
+  position: absolute;
+  top: 12%;
+  font-size: 11px;
+  color: var(--slate-500);
+  font-weight: 600;
+  background: rgba(255,255,255,0.7);
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+/* ========== TEAM ========== */
+.team-section { background: var(--white); text-align: center; }
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  margin-top: 48px;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.team-card {
+  text-align: center;
+  padding: 32px 24px;
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius);
+  transition: all 0.3s;
+}
+.team-card:hover {
+  box-shadow: var(--shadow-lg);
+  border-color: var(--blue-400);
+}
+.team-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--blue-100), var(--green-100));
+  margin: 0 auto 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: var(--blue-600);
+  font-weight: 700;
+  font-family: var(--font-display);
+  border: 3px solid var(--white);
+  box-shadow: var(--shadow-md);
+}
+.team-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--slate-800);
+  margin-bottom: 4px;
+}
+.team-role {
+  font-size: 13px;
+  color: var(--blue-600);
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+.team-detail {
+  font-size: 12px;
+  color: var(--slate-400);
+  line-height: 1.5;
+}
+
+/* ========== CTA ========== */
+.cta-section {
+  background: linear-gradient(135deg, var(--blue-700), var(--blue-900));
+  text-align: center;
+  color: white;
+  padding: 96px 32px;
+}
+.cta-section .section-title {
+  color: white;
+  max-width: 600px;
+  margin: 0 auto 16px;
+}
+.cta-section .section-subtitle {
+  color: rgba(255,255,255,0.7);
+  margin: 0 auto 32px;
+}
+.cta-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+}
+.btn-white {
+  padding: 14px 32px;
+  background: white;
+  color: var(--blue-700);
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+.btn-white:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+}
+.btn-outline-white {
+  padding: 14px 32px;
+  background: transparent;
+  color: white;
+  border: 1.5px solid rgba(255,255,255,0.3);
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+.btn-outline-white:hover {
+  background: rgba(255,255,255,0.1);
+  border-color: rgba(255,255,255,0.5);
+}
+
+/* ========== FOOTER ========== */
+footer {
+  background: var(--slate-900);
+  color: rgba(255,255,255,0.5);
+  padding: 48px 32px 32px;
+}
+.footer-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.footer-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.footer-logo {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 20px;
+  color: white;
+}
+.footer-logo span { color: var(--green-400); }
+.footer-tagline {
+  font-size: 13px;
+  color: rgba(255,255,255,0.4);
+}
+.footer-links {
+  display: flex;
+  gap: 48px;
+}
+.footer-col h5 {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgba(255,255,255,0.3);
+  margin-bottom: 12px;
+}
+.footer-col a {
+  display: block;
+  font-size: 13px;
+  color: rgba(255,255,255,0.5);
+  text-decoration: none;
+  margin-bottom: 8px;
+  transition: color 0.2s;
+}
+.footer-col a:hover { color: rgba(255,255,255,0.8); }
+.footer-bottom {
+  max-width: 1200px;
+  margin: 32px auto 0;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  font-size: 12px;
+  text-align: center;
+  color: rgba(255,255,255,0.3);
+}
+
+/* ========== ANIMATIONS ========== */
+.fade-in {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.fade-in.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 1024px) {
+  .hero-inner { grid-template-columns: 1fr; gap: 40px; }
+  .hero h1 { font-size: 40px; }
+  .problem-grid { grid-template-columns: 1fr; }
+  .features-grid { grid-template-columns: 1fr 1fr; }
+  .market-stats { grid-template-columns: 1fr 1fr; }
+  .demo-app { grid-template-columns: 1fr; }
+  .demo-map { min-height: 300px; }
+}
+@media (max-width: 640px) {
+  .hero { padding: 120px 20px 60px; }
+  .hero h1 { font-size: 32px; }
+  .section { padding: 64px 20px; }
+  .section-title { font-size: 30px; }
+  .nav-links { display: none; }
+  .steps-grid { grid-template-columns: 1fr; }
+  .steps-grid::before { display: none; }
+  .features-grid { grid-template-columns: 1fr; }
+  .audience-grid { grid-template-columns: 1fr; }
+  .market-stats { grid-template-columns: 1fr; }
+  .team-grid { grid-template-columns: 1fr; }
+  .footer-inner { flex-direction: column; gap: 32px; }
+  .hero-proof { flex-wrap: wrap; gap: 20px; }
+  .hero-stat-divider { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">
+      <div class="nav-logo-icon">⛽</div>
+      <!-- [MANUAL LOGO] Replace icon with actual FuelWise logo -->
+      <div class="nav-logo-text">Fuel<span>Wise</span></div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#problem">Problem</a></li>
+      <li><a href="#how-it-works">How It Works</a></li>
+      <li><a href="#features">Features</a></li>
+      <li><a href="#demo">Demo</a></li>
+      <li><a href="#team">Team</a></li>
+      <li><a href="#cta" class="nav-cta">Get Started</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-content">
+      <div class="hero-badge">Launching in Dharwad–Belgaum–Goa corridor</div>
+      <h1>Stop overpaying<br>for fuel on <em>every</em> trip.</h1>
+      <p class="hero-sub">
+        FuelWise finds the cheapest fueling plan for your entire route — comparing prices across IOCL, BPCL, HPCL, and private retailers, personalized to your vehicle.
+      </p>
+      <div class="hero-actions">
+        <a href="#demo" class="btn-primary">
+          <span>▶</span> Try the Demo
+        </a>
+        <a href="#how-it-works" class="btn-secondary">
+          How It Works
+        </a>
+      </div>
+      <div class="hero-proof">
+        <div class="hero-stat">
+          <div class="hero-stat-value">₹27</div>
+          <div class="hero-stat-label">Price gap per litre across India</div>
+        </div>
+        <div class="hero-stat-divider"></div>
+        <div class="hero-stat">
+          <div class="hero-stat-value">1,00,000+</div>
+          <div class="hero-stat-label">Fuel stations nationwide</div>
+        </div>
+        <div class="hero-stat-divider"></div>
+        <div class="hero-stat">
+          <div class="hero-stat-value">70%</div>
+          <div class="hero-stat-label">Users found it useful in validation</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <div class="float-savings">
+        <div class="float-savings-amount">Save ₹160</div>
+        <div class="float-savings-label">on a full tank</div>
+      </div>
+      <div class="product-card">
+        <div class="product-card-header">
+          <span class="product-card-header-title">⛽ FuelWise Route Planner</span>
+          <div class="product-card-header-dots">
+            <span></span><span></span><span></span>
+          </div>
+        </div>
+        <div class="product-card-body">
+          <div class="route-inputs">
+            <div class="route-input">
+              <div class="dot dot-green"></div>
+              Dharwad, Karnataka
+            </div>
+            <div class="route-connector"></div>
+            <div class="route-input">
+              <div class="dot dot-red"></div>
+              Panaji, Goa
+            </div>
+          </div>
+          <div class="route-meta">
+            <span class="route-meta-tag active">Petrol</span>
+            <span class="route-meta-tag">Maruti Swift · 18 km/l</span>
+            <span class="route-meta-tag">Tank: 37L</span>
+          </div>
+
+          <div class="fuel-stop best">
+            <div class="fuel-stop-logo" style="background: linear-gradient(135deg, #1b5e20, #388e3c);">HP</div>
+            <div class="fuel-stop-info">
+              <div class="fuel-stop-name">RP Fuel Services<span class="fuel-stop-badge">Best Price</span></div>
+              <div class="fuel-stop-detail">Belgaum, Karnataka · 5.2 km detour</div>
+            </div>
+            <div class="fuel-stop-price">
+              <div class="fuel-stop-price-value">₹96.75</div>
+              <div class="fuel-stop-price-unit">/litre</div>
+              <div class="fuel-stop-savings">Save ₹160 on full tank</div>
+            </div>
+          </div>
+
+          <div class="fuel-stop">
+            <div class="fuel-stop-logo" style="background: linear-gradient(135deg, #e65100, #f57c00);">BP</div>
+            <div class="fuel-stop-info">
+              <div class="fuel-stop-name">BP Petrol Pump</div>
+              <div class="fuel-stop-detail">Khanapur, Karnataka · 2 min detour</div>
+            </div>
+            <div class="fuel-stop-price">
+              <div class="fuel-stop-price-value">₹98.89</div>
+              <div class="fuel-stop-price-unit">/litre</div>
+            </div>
+          </div>
+
+          <div class="fuel-stop">
+            <div class="fuel-stop-logo" style="background: linear-gradient(135deg, #c62828, #e53935);">IO</div>
+            <div class="fuel-stop-info">
+              <div class="fuel-stop-name">IOCL Petrol Pump</div>
+              <div class="fuel-stop-detail">Mollem, Goa · on route</div>
+            </div>
+            <div class="fuel-stop-price">
+              <div class="fuel-stop-price-value">₹99.20</div>
+              <div class="fuel-stop-price-unit">/litre</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEM -->
+<section class="section problem-section fade-in" id="problem">
+  <div class="section-inner">
+    <div class="section-label">The Problem</div>
+    <h2 class="section-title">Fuel prices in India are a maze.<br>No one helps you navigate it.</h2>
+    <p class="section-subtitle">
+      Fuel is not under GST. Each state sets its own VAT — creating a price spread of up to ₹27 per litre. Yet no single platform compares prices across all oil companies for your specific route.
+    </p>
+    <div class="problem-grid">
+      <div class="problem-visual">
+        <div class="price-map-card">
+          <div class="price-map-header">
+            <h4>Petrol Prices — Same Day, Different States</h4>
+            <span class="price-map-date">Sample data · prices change daily</span>
+          </div>
+          <div class="price-map-body">
+            <div class="state-price-row">
+              <div>
+                <div class="state-name">Andaman & Nicobar</div>
+                <div class="state-vat">VAT: ~1%</div>
+              </div>
+              <div class="state-price low">₹84.72</div>
+            </div>
+            <div class="state-price-row">
+              <div>
+                <div class="state-name">Goa</div>
+                <div class="state-vat">VAT: ~25%</div>
+              </div>
+              <div class="state-price low">₹95.31</div>
+            </div>
+            <div class="state-price-row">
+              <div>
+                <div class="state-name">Karnataka</div>
+                <div class="state-vat">VAT: ~26%</div>
+              </div>
+              <div class="state-price mid">₹99.84</div>
+            </div>
+            <div class="state-price-row">
+              <div>
+                <div class="state-name">Maharashtra</div>
+                <div class="state-vat">VAT: ~26%</div>
+              </div>
+              <div class="state-price mid">₹103.44</div>
+            </div>
+            <div class="state-price-row">
+              <div>
+                <div class="state-name">Andhra Pradesh</div>
+                <div class="state-vat">VAT: ~31%</div>
+              </div>
+              <div class="state-price high">₹111.09</div>
+            </div>
+            <div class="price-spread-bar">
+              <span class="price-spread-label">Maximum price spread</span>
+              <span class="price-spread-value">~₹27/litre</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="problem-points">
+        <div class="problem-point">
+          <div class="problem-point-icon red">✕</div>
+          <div>
+            <h4>Each app only shows its own stations</h4>
+            <p>IOCL, BPCL, and HPCL apps only list their own fuel stations. No cross-company comparison exists anywhere.</p>
+          </div>
+        </div>
+        <div class="problem-point">
+          <div class="problem-point-icon orange">⚡</div>
+          <div>
+            <h4>No route-based optimization</h4>
+            <p>Existing tools show the nearest pump — not the cheapest fueling plan across your entire trip.</p>
+          </div>
+        </div>
+        <div class="problem-point">
+          <div class="problem-point-icon blue">🚛</div>
+          <div>
+            <h4>Fleet operators lose lakhs every year</h4>
+            <p>A company running 20 trucks across 3 states leaves lakhs of rupees on the table without optimized refueling strategies.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section how-section fade-in" id="how-it-works">
+  <div class="section-inner">
+    <div class="section-label" style="justify-content: center;">How It Works</div>
+    <h2 class="section-title" style="text-align: center;">Three inputs. One optimal plan.</h2>
+    <p class="section-subtitle" style="text-align: center; margin: 0 auto;">
+      Enter your vehicle, your route, and your current fuel level. FuelWise does the rest.
+    </p>
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-number">
+          <span class="step-num-text">1</span>
+          🚗
+        </div>
+        <h3>Set your vehicle</h3>
+        <p>Select your vehicle type, fuel preference, mileage, and tank capacity for personalized calculations.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-number">
+          <span class="step-num-text">2</span>
+          🗺️
+        </div>
+        <h3>Enter your route</h3>
+        <p>Type your starting point and destination. We map every fuel station along your path with real-time prices.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-number">
+          <span class="step-num-text">3</span>
+          💰
+        </div>
+        <h3>Get the cheapest plan</h3>
+        <p>Our algorithm calculates where to stop, at which station, and how many litres to fill — minimizing your total fuel cost.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="section features-section fade-in" id="features">
+  <div class="section-inner">
+    <div class="section-label">Core Features</div>
+    <h2 class="section-title">Built for real savings,<br>not just price listings.</h2>
+    <p class="section-subtitle">
+      FuelWise goes beyond showing prices — it builds a complete fueling strategy for every trip.
+    </p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon blue">🔄</div>
+        <h3>Cross-Company Comparison</h3>
+        <p>Compare prices from IOCL, BPCL, HPCL, Nayara Energy, and Shell — all in one view. No more switching between apps.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon green">📍</div>
+        <h3>Route-Based Optimization</h3>
+        <p>Not just the nearest pump — the cheapest fueling plan across your entire trip, accounting for detour time and fuel consumption.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon orange">🚗</div>
+        <h3>Vehicle-Aware Calculations</h3>
+        <p>Savings estimates personalized to your vehicle's actual mileage and tank capacity. Not generic averages.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon blue">📊</div>
+        <h3>Tax Transparency</h3>
+        <p>See exactly why prices differ — central excise, state VAT, dealer margin — all broken down clearly.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon green">📅</div>
+        <h3>Daily Price Updates</h3>
+        <p>Fuel prices change every day at 6 AM. We pull fresh data from all oil marketing companies daily.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon orange">🚛</div>
+        <h3>Fleet Management (Premium)</h3>
+        <p>Multi-vehicle tracking, monthly fuel expense reports, and route history analytics for fleet operators.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHO IT'S FOR -->
+<section class="section audience-section fade-in" id="audience">
+  <div class="section-inner">
+    <div class="section-label">Who It's For</div>
+    <h2 class="section-title">From fleet operators to<br>highway commuters.</h2>
+    <p class="section-subtitle">
+      Anyone who travels between cities and wants to spend less on fuel.
+    </p>
+    <div class="audience-grid">
+      <div class="audience-card fleet">
+        <div class="audience-card-label">Primary Market</div>
+        <h3>Fleet Operators & Logistics</h3>
+        <p>Companies running 5–50+ vehicles across state borders. Fuel is the single largest operating expense — even small per-litre savings compound into lakhs annually.</p>
+        <div class="audience-features">
+          <div class="audience-feature"><div class="check">✓</div> Multi-vehicle route optimization</div>
+          <div class="audience-feature"><div class="check">✓</div> Monthly fuel expense reports</div>
+          <div class="audience-feature"><div class="check">✓</div> Cross-state VAT arbitrage</div>
+          <div class="audience-feature"><div class="check">✓</div> Web dashboard for daily ops</div>
+        </div>
+      </div>
+      <div class="audience-card commuter">
+        <div class="audience-card-label">Secondary Market</div>
+        <h3>Commuters & Gig Workers</h3>
+        <p>Intercity highway commuters, cab drivers, delivery partners, and students who travel frequently between cities and states.</p>
+        <div class="audience-features">
+          <div class="audience-feature"><div class="check">✓</div> One-click route fuel planning</div>
+          <div class="audience-feature"><div class="check">✓</div> Price drop alerts</div>
+          <div class="audience-feature"><div class="check">✓</div> Saved vehicles & routes</div>
+          <div class="audience-feature"><div class="check">✓</div> Free core features forever</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPETITIVE EDGE -->
+<section class="section edge-section fade-in" id="edge">
+  <div class="section-inner">
+    <div class="section-label">Why FuelWise</div>
+    <h2 class="section-title">The only platform doing route-based<br>fuel optimization in India.</h2>
+    <p class="section-subtitle">
+      Nobody else compares all oil companies, maps them to your route, and factors in your specific vehicle.
+    </p>
+    <div class="comparison-table">
+      <div class="comp-row header">
+        <div class="comp-cell">Feature</div>
+        <div class="comp-cell fw">FuelWise</div>
+        <div class="comp-cell">IOCL / BPCL</div>
+        <div class="comp-cell">PetrolPrices.in</div>
+        <div class="comp-cell">Google Maps</div>
+      </div>
+      <div class="comp-row">
+        <div class="comp-cell">Cross-company price comparison</div>
+        <div class="comp-cell"><div class="comp-yes">✓</div></div>
+        <div class="comp-cell"><div class="comp-no">—</div></div>
+        <div class="comp-cell"><div class="comp-no">—</div></div>
+        <div class="comp-cell"><div class="comp-no">—</div></div>
+      </div>
+      <div class="comp-row">
+        <div class="comp-cell">Route-based optimization</div>
+        <div class="comp-cell"><div class="comp-yes">✓</div></div>
+        <div class="comp-cell"><div class="comp-no">—</div></div>
+        <div class="comp-cell"><div class="comp-no">—</div></div>
+        <div class="comp-cell"><div class="comp-no">—</div></div>
+      </div>
+      <div class="comp-row">
+        <div class="comp-cell">Vehicle-specific mileage & tank</div>
+        <div class="comp-cell"><div class="comp-yes">✓</div></div>
+        <div class="comp-cell"><div class="comp-no">—</div></div>
+        <div class="comp-cell"><div class="comp-no">—</div></div>
+        <div class="comp-cell"><div class="comp-no">—</div></div>
+      </div>
+      <div class="comp-row">
+        <div class="comp-cell">Tax breakdown (VAT, excise)</div>
+        <div class="comp-cell"><div class="comp-yes">✓</div></div>
+        <div class="comp-cell"><div class="comp-no">—</div></div>
+        <div class="comp-cell"><div class="comp-yes">✓</div></div>
+        <div class="comp-cell"><div class="comp-no">—</div></div>
+      </div>
+      <div class="comp-row">
+        <div class="comp-cell">Multi-stop fueling plan</div>
+        <div class="comp-cell"><div class="comp-yes">✓</div></div>
+        <div class="comp-cell"><div class="comp-no">—</div></div>
+        <div class="comp-cell"><div class="comp-no">—</div></div>
+        <div class="comp-cell"><div class="comp-no">—</div></div>
+      </div>
+      <div class="comp-row">
+        <div class="comp-cell">Fleet management dashboard</div>
+        <div class="comp-cell"><div class="comp-yes">✓</div></div>
+        <div class="comp-cell"><div class="comp-no">—</div></div>
+        <div class="comp-cell"><div class="comp-no">—</div></div>
+        <div class="comp-cell"><div class="comp-no">—</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MARKET -->
+<section class="section market-section fade-in" id="market">
+  <div class="section-inner">
+    <div class="section-label">Market Opportunity</div>
+    <h2 class="section-title">A structurally persistent opportunity.</h2>
+    <p class="section-subtitle">
+      India's unique tax structure — fuel outside GST — creates a price arbitrage that won't disappear. The market is massive, growing, and underserved.
+    </p>
+    <div class="market-stats">
+      <div class="market-stat-card">
+        <div class="market-stat-value">$54.8B</div>
+        <div class="market-stat-label">India's retail fuel market (2025)</div>
+      </div>
+      <div class="market-stat-card">
+        <div class="market-stat-value">400M+</div>
+        <div class="market-stat-label">Registered vehicles in India</div>
+      </div>
+      <div class="market-stat-card">
+        <div class="market-stat-value">1.2 Cr</div>
+        <div class="market-stat-label">Gig workers in transport (FY25)</div>
+      </div>
+      <div class="market-stat-card">
+        <div class="market-stat-value">110%</div>
+        <div class="market-stat-label">Fuel consumption growth (decade)</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DEMO -->
+<section class="section demo-section fade-in" id="demo">
+  <div class="section-inner">
+    <div class="section-label" style="justify-content: center;">Product Preview</div>
+    <h2 class="section-title" style="text-align: center;">See it in action.</h2>
+    <p class="section-subtitle" style="text-align: center; margin: 0 auto;">
+      A preview of the FuelWise route planner — the core experience of the platform.
+    </p>
+    <div class="demo-container">
+      <div class="demo-app">
+        <div class="demo-sidebar">
+          <h4>⛽ Plan Your Route</h4>
+          <div class="demo-field">
+            <label>Starting Point</label>
+            <input class="demo-input" placeholder="e.g. Dharwad, Karnataka" value="Dharwad, Karnataka" />
+          </div>
+          <div class="demo-field">
+            <label>Destination</label>
+            <input class="demo-input" placeholder="e.g. Panaji, Goa" value="Panaji, Goa" />
+          </div>
+          <div class="demo-field">
+            <label>Fuel Type</label>
+            <select class="demo-select">
+              <option>Petrol</option>
+              <option>Diesel</option>
+            </select>
+          </div>
+          <div class="demo-field">
+            <label>Vehicle</label>
+            <select class="demo-select">
+              <option>Maruti Swift · 18 km/l · 37L tank</option>
+              <option>Honda Activa · 45 km/l · 5.3L tank</option>
+              <option>Ashok Leyland Truck · 8 km/l · 90L tank</option>
+            </select>
+          </div>
+          <div class="demo-field">
+            <label>Current Fuel Level</label>
+            <select class="demo-select">
+              <option>Quarter tank (~25%)</option>
+              <option>Half tank (~50%)</option>
+              <option>Near empty (~10%)</option>
+              <option>Three-quarter (~75%)</option>
+            </select>
+          </div>
+          <button class="demo-btn">🔍 Find Best Fuel Stops</button>
+        </div>
+        <div class="demo-map">
+          <!-- [MANUAL PRODUCT SCREENSHOT] Replace with actual map integration -->
+          <div class="map-grid"></div>
+          <div class="map-route-line"></div>
+          <div class="map-pin" style="left: 8%; top: 48%;">
+            <div class="map-pin-dot" style="background: var(--green-500);"></div>
+            <div class="map-pin-label" style="color: var(--green-600);">Dharwad</div>
+          </div>
+          <div class="map-pin" style="right: 8%; top: 48%;">
+            <div class="map-pin-dot" style="background: var(--red-500);"></div>
+            <div class="map-pin-label" style="color: var(--red-500);">Panaji</div>
+          </div>
+          <div class="map-fuel-marker" style="left: 32%; top: 30%;">
+            <div class="map-fuel-icon">⛽</div>
+            <div class="map-fuel-price">₹96.75/L ★</div>
+          </div>
+          <div class="map-fuel-marker" style="left: 52%; top: 60%;">
+            <div class="map-fuel-icon" style="background: var(--blue-500);">⛽</div>
+            <div class="map-fuel-price" style="color: var(--blue-600);">₹98.89/L</div>
+          </div>
+          <div class="map-fuel-marker" style="left: 72%; top: 35%;">
+            <div class="map-fuel-icon" style="background: var(--slate-400);">⛽</div>
+            <div class="map-fuel-price" style="color: var(--slate-600);">₹99.20/L</div>
+          </div>
+          <div class="state-border-line" style="left: 42%;"></div>
+          <div class="state-label-tag" style="left: 30%;">Karnataka</div>
+          <div class="state-label-tag" style="left: 48%;">Goa</div>
+        </div>
+      </div>
+    </div>
+    <p style="text-align: center; margin-top: 16px; font-size: 13px; color: var(--slate-400);">
+      This is a conceptual preview. The live product will use real-time map data and daily fuel prices.
+    </p>
+  </div>
+</section>
+
+<!-- TEAM -->
+<section class="section team-section fade-in" id="team">
+  <div class="section-inner">
+    <div class="section-label" style="justify-content: center;">The Team</div>
+    <h2 class="section-title">Built by students solving a real problem.</h2>
+    <p class="section-subtitle" style="margin: 0 auto; text-align: center;">
+      Three first-year students from IIIT Dharwad with the technical skills and drive to build India's first fuel cost optimization platform.
+    </p>
+    <div class="team-grid">
+      <div class="team-card">
+        <!-- [MANUAL TEAM PHOTO] Replace avatar with actual photo -->
+        <div class="team-avatar">NM</div>
+        <div class="team-name">Nilesh D. Mahajan</div>
+        <div class="team-role">Founder & CEO</div>
+        <div class="team-detail">CSE, IIIT Dharwad<br>Strategy, BD & Operations<br>Ex-cadet, Sainik School Chandrapur</div>
+      </div>
+      <div class="team-card">
+        <!-- [MANUAL TEAM PHOTO] Replace avatar with actual photo -->
+        <div class="team-avatar">NS</div>
+        <div class="team-name">Nagumalli Satwika</div>
+        <div class="team-role">Frontend & UI/UX Lead</div>
+        <div class="team-detail">ECE, IIIT Dharwad<br>Frontend Development,<br>Design & User Research</div>
+      </div>
+      <div class="team-card">
+        <!-- [MANUAL TEAM PHOTO] Replace avatar with actual photo -->
+        <div class="team-avatar">AS</div>
+        <div class="team-name">Ayush Singh</div>
+        <div class="team-role">Backend & Algorithm Lead</div>
+        <div class="team-detail">DSAI, IIIT Dharwad<br>Data Pipeline,<br>Optimization Algorithm</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="cta">
+  <div class="section-inner">
+    <div class="section-label" style="justify-content: center; color: var(--blue-400);">
+      <span style="display:inline-block; width:20px; height:2px; background: var(--blue-400); border-radius:2px; margin-right: 8px;"></span>
+      Get Started
+    </div>
+    <h2 class="section-title">Stop leaving money at<br>every fuel station.</h2>
+    <p class="section-subtitle">
+      FuelWise is launching soon in the Dharwad–Belgaum–Goa corridor. Join early and start saving from day one.
+    </p>
+    <div class="cta-actions">
+      <a href="#" class="btn-white">Join the Waitlist</a>
+      <a href="#" class="btn-outline-white">Partner With Us</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="footer-logo">Fuel<span>Wise</span></div>
+      <div class="footer-tagline">Fuel smarter · Drive further · Spend less</div>
+      <div style="font-size: 12px; margin-top: 8px; color: rgba(255,255,255,0.3);">IIIT Dharwad, Karnataka, India</div>
+    </div>
+    <div class="footer-links">
+      <div class="footer-col">
+        <h5>Product</h5>
+        <a href="#how-it-works">How It Works</a>
+        <a href="#features">Features</a>
+        <a href="#demo">Demo</a>
+        <a href="#">Pricing</a>
+      </div>
+      <div class="footer-col">
+        <h5>Company</h5>
+        <a href="#team">Team</a>
+        <a href="#">About</a>
+        <a href="#">Contact</a>
+      </div>
+      <div class="footer-col">
+        <h5>Connect</h5>
+        <!-- [MANUAL SOCIAL LINKS] Add actual social media URLs -->
+        <a href="#">Twitter / X</a>
+        <a href="#">LinkedIn</a>
+        <a href="#">Email</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    © 2026 FuelWise. Built at IIIT Dharwad. All rights reserved.
+  </div>
+</footer>
+
+<script>
+// Navbar shadow on scroll
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 20);
+});
+
+// Fade-in on scroll
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -60px 0px' });
+
+document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+// Smooth scroll
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', function (e) {
+    const target = document.querySelector(this.getAttribute('href'));
+    if (target) {
+      e.preventDefault();
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+});
+</script>
+
+</body>
+</html>
